@@ -130,9 +130,11 @@ VERBOSE && info("boost version: $BOOST_VERSION")
 # make sure FLANN_INCLUDE_DIR is addded as kind=C_System
 cxxinclude(joinpath(FLANN_INCLUDE_DIR, "flann/flann.h"))
 cxx"""
+namespace libpcl {
 std::string getFLANNVersion() { return FLANN_VERSION_; }
+}
 """
-getFLANNVersion() = bytestring(icxx"getFLANNVersion();")
+getFLANNVersion() = bytestring(icxx"libpcl::getFLANNVersion();")
 VERBOSE && info("FLANN version: $(getFLANNVersion())")
 
 end # module
