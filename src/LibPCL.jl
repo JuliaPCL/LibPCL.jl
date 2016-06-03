@@ -9,16 +9,16 @@ module LibPCL
 const VERBOSE = Bool(parse(Int, get(ENV, "LIBPCLJL_VERBOSE", "0")))
 
 const BOOST_INCLUDE_DIR = get(ENV, "BOOST_INCLUDE_DIR",
-    @osx? "/usr/local/include" : "/usr/include")
+    @static is_apple()? "/usr/local/include" : "/usr/include")
 const FLANN_INCLUDE_DIR = get(ENV, "FLANN_INCLUDE_DIR",
-    @osx? "/usr/local/include" : "/usr/include")
+    @static is_apple()? "/usr/local/include" : "/usr/include")
 const EIGEN_INCLUDE_DIR = get(ENV, "EIGEN_INCLUDE_DIR",
-    @osx? "/usr/local/include/eigen3" : "/usr/include/eigen3")
+    @static is_apple()? "/usr/local/include/eigen3" : "/usr/include/eigen3")
 
 searchdir(path, key) = filter(x->contains(x, key), readdir(path))
 
 const VTK_INCLUDE_DIR_PARENT = get(ENV, "VTK_INCLUDE_DIR_PARENT",
-    @osx? "/usr/local/include" : "/usr/include")
+    @static is_apple()? "/usr/local/include" : "/usr/include")
 
 # Search GUI backend
 vtk_dirs = searchdir(VTK_INCLUDE_DIR_PARENT, "vtk-")
@@ -75,7 +75,7 @@ const incdir = joinpath(_incdir, "pcl-$pcl_version")
 # Make sure vtk libraries are loaded before calling @cxx vtkVersion::xxx()
 if has_vtk_backend
     cxxinclude(joinpath(VTK_INCLUDE_DIR, "vtkVersion.h"))
-    global const vtk_version = bytestring(icxx"vtkVersion::GetVTKVersion();")
+    global const vtk_version = String(icxx"vtkVersion::GetVTKVersion();")
 end
 
 function add_header_dirs(top=incdir)
