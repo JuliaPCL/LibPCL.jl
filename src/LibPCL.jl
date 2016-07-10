@@ -75,7 +75,7 @@ const incdir = joinpath(_incdir, "pcl-$pcl_version")
 # Make sure vtk libraries are loaded before calling @cxx vtkVersion::xxx()
 if has_vtk_backend
     cxxinclude(joinpath(VTK_INCLUDE_DIR, "vtkVersion.h"))
-    global const vtk_version = String(icxx"vtkVersion::GetVTKVersion();")
+    global const vtk_version = unsafe_string(icxx"vtkVersion::GetVTKVersion();")
 end
 
 function add_header_dirs(top=incdir)
@@ -134,7 +134,7 @@ namespace libpcl {
 std::string getFLANNVersion() { return FLANN_VERSION_; }
 }
 """
-getFLANNVersion() = bytestring(icxx"libpcl::getFLANNVersion();")
+getFLANNVersion() = unsafe_string(icxx"libpcl::getFLANNVersion();")
 VERBOSE && info("FLANN version: $(getFLANNVersion())")
 
 end # module
