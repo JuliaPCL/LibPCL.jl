@@ -1,5 +1,5 @@
 """
-A special package that manges PCL binary depedencies
+A special package that manages PCL binary depedencies
 
 ```julia
 Pkg.build("LibPCL")
