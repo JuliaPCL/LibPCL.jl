@@ -1,4 +1,18 @@
+"""
+A special package that manges PCL binary depedencies
+
+```julia
+Pkg.build("LibPCL")
+```
+
+try to search your system PCL libraries and its dependencies, and throws errors
+if any issues. If PCL librarires are not found, it will install fresh PCL
+libraries into `deps` directrory, but not recommended unless if you have perfect
+requiremsnts to build PCL, since it's a little hard to build.
+"""
 module LibPCL
+
+using DocStringExtensions
 
 # PCL main dependenices are:
 # - boost
@@ -30,8 +44,6 @@ if has_vtk_backend
     VERBOSE && info("vtk include directory found: $VTK_INCLUDE_DIR")
 end
 
-using BinDeps
-
 # Load required dependency
 deps = joinpath(Pkg.dir("LibPCL"), "deps", "deps.jl")
 if isfile(deps)
@@ -47,6 +59,36 @@ Libdl.dlopen(libpcl_common, Libdl.RTLD_GLOBAL)
 const libdir = dirname(libpcl_common)
 const libext = splitext(libpcl_common)[2]
 
+"""
+$(SIGNATURES)
+
+It tries to search the specified library by name. Not exported, but meant to be
+used by other PCL packages.
+
+**Parameters**
+
+- `mod` : Module name
+- `libdirs` : library seach directries (default is dir of `libpclcommon`)
+- `ext` : library extention name (e.g. `.so`)
+
+**Retures**
+
+- `libpath` : library path if found, othrewise return `C_NULL`
+
+**Examples**
+
+From the PCLVisualization package,
+
+```julia
+const libpcl_visualization = LibPCL.find_library_e("libpcl_visualization")
+try
+    Libdl.dlopen(libpcl_visualization, Libdl.RTLD_GLOBAL)
+catch e
+    warn("You might need to set DYLD_LIBRARY_PATH to load dependencies proeprty.")
+    rethrow(e)
+end
+```
+"""
 function find_library_e(mod, libdirs=[libdir], ext=libext)
     for libdir in libdirs
         libpath = joinpath(libdir, string(mod, ext))
@@ -54,8 +96,7 @@ function find_library_e(mod, libdirs=[libdir], ext=libext)
             return libpath
         end
     end
-
-    error("Cannot find $mod")
+    C_NULL
 end
 
 function get_pcl_version(top)
